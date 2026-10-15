@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Security Lab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Web Security Lab</h1>
+    <p class="subtitle">Break it, then fix it. Four common web vulnerabilities, each with a vulnerable and a secure version.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="xss">1. XSS</button>
+    <button data-tab="sqli">2. SQL Injection</button>
+    <button data-tab="storage">3. Password Storage</button>
+    <button data-tab="brute">4. Brute Force</button>
+  </nav>
+
+  <!-- MODULE 1: XSS -->
+  <section id="xss" class="module active">
+    <h2>1. Cross-Site Scripting (XSS)</h2>
+    <p class="tag">OWASP Top 10 (2021): A03 Injection</p>
+    <p>A comment box shows what users write. If the page inserts the comment as HTML, an attacker can hide a script inside it, and that script runs in every visitor's browser.</p>
+    <label for="xss-input">Comment</label>
+    <textarea id="xss-input" placeholder="Write a comment, or click the example attack"></textarea>
+    <div class="row">
+      <button id="xss-post">Post comment</button>
+      <button class="secondary" id="xss-example">Load example attack</button>
+    </div>
+    <div class="cols">
+      <div class="panel vuln">
+        <h3>Vulnerable version</h3>
+        <div id="xss-banner" class="banner">Attacker's script ran in your page!</div>
+        <div id="xss-vuln" class="box"></div>
+        <pre>box.innerHTML = comment;</pre>
+      </div>
+      <div class="panel safe">
+        <h3>Secure version</h3>
+        <div id="xss-secure" class="box"></div>
+        <pre>box.textContent = comment;</pre>
+      </div>
+    </div>
+    <p class="fix"><strong>The fix:</strong> never insert user input as HTML. Use <code>textContent</code> so the browser treats it as plain text. Also escape output on the server and add a Content Security Policy.</p>
+  </section>
+
+  <!-- MODULE 2: SQL INJECTION -->
+  <section id="sqli" class="module">
+    <h2>2. SQL Injection (simulated)</h2>
+    <p class="tag">OWASP Top 10 (2021): A03 Injection</p>
+    <p>A login form builds a database query from what you type. If the input is pasted straight into the query, an attacker can change the query itself. Valid accounts: <code>admin</code> and <code>feven</code>.</p>
+    <label for="sqli-user">Username</label>
+    <input type="text" id="sqli-user" placeholder="Try: admin' --">
+    <label for="sqli-pass">Password</label>
+    <input type="text" id="sqli-pass" placeholder="Try: ' OR '1'='1">
+    <div class="row">
+      <button id="sqli-run">Log in</button>
+      <button class="secondary" id="sqli-example">Load example attack</button>
+    </div>
+    <div class="cols">
+      <div class="panel vuln">
+        <h3>Vulnerable version</h3>
+        <p class="small">Query sent to the database:</p>
+        <div id="sqli-vq" class="box mono"></div>
+        <div id="sqli-vr" class="result"></div>
+        <pre>query = "... username = '" + user + "'"</pre>
+      </div>
+      <div class="panel safe">
+        <h3>Secure version</h3>
+        <p class="small">Query and parameters sent separately:</p>
+        <div id="sqli-sq" class="box mono"></div>
+        <div id="sqli-sr" class="result"></div>
+        <pre>db.query("... username = ?", [user])</pre>
+      </div>
+    </div>
+    <p class="fix"><strong>The fix:</strong> use parameterized queries (prepared statements). The database receives the query and the data separately, so input can never change the query's structure. Also apply least privilege to the database account.</p>
+    <p class="small">This is a simplified simulation that recognizes common injection patterns. It does not use a real database.</p>
+  </section>
+
+  <!-- MODULE 3: PASSWORD STORAGE -->
+  <section id="storage" class="module">
+    <h2>3. Password Storage</h2>
+    <p class="tag">OWASP Top 10 (2021): A02 Cryptographic Failures</p>
+    <p>Imagine an attacker steals a website's database. What they can do depends on how passwords were stored. Enter a password to see three storage methods, then let the attacker try a small wordlist.</p>
+    <label for="st-pass">Password to store</label>
+    <input type="text" id="st-pass" placeholder="Try password123, then try a long random one">
+    <div class="row">
+      <button id="st-register">Store it</button>
+      <button class="secondary" id="st-attack">Run attacker (10-word list)</button>
+    </div>
+    <div class="cols3">
+      <div class="panel vuln">
+        <h3>Plain text</h3>
+        <div id="st-plain" class="box mono"></div>
+        <div id="st-plain-r" class="result"></div>
+      </div>
+      <div class="panel vuln">
+        <h3>Unsalted SHA-256</h3>
+        <div id="st-unsalted" class="box mono"></div>
+        <div id="st-unsalted-r" class="result"></div>
+      </div>
+      <div class="panel safe">
+        <h3>Salted PBKDF2</h3>
+        <div id="st-salted" class="box mono"></div>
+        <div id="st-salted-r" class="result"></div>
+      </div>
+    </div>
+    <p class="fix"><strong>The fix:</strong> store passwords with a slow, salted algorithm (PBKDF2, bcrypt, scrypt or Argon2). The salt stops precomputed tables, and the slowness makes every guess expensive. Notice that even the secure method cannot save a very weak password, so strong passwords still matter.</p>
+  </section>
+
+  <!-- MODULE 4: BRUTE FORCE -->
+  <section id="brute" class="module">
+    <h2>4. Brute Force Login</h2>
+    <p class="tag">OWASP Top 10 (2021): A07 Identification and Authentication Failures</p>
+    <p>An attacker tries a list of 12 common passwords against one account. The target's real password is on the list. Compare a login with no protection against one that locks the account after 5 failed attempts.</p>
+    <div class="row">
+      <button id="bf-run">Run attack</button>
+    </div>
+    <div class="cols">
+      <div class="panel vuln">
+        <h3>No protection</h3>
+        <div id="bf-vlog" class="box mono"></div>
+        <div id="bf-vr" class="result"></div>
+      </div>
+      <div class="panel safe">
+        <h3>Lockout after 5 failures</h3>
+        <div id="bf-slog" class="box mono"></div>
+        <div id="bf-sr" class="result"></div>
+      </div>
+    </div>
+    <p class="fix"><strong>The fix:</strong> combine rate limiting, temporary lockouts, multi-factor authentication and breach-password checks. Note that hard lockouts can be abused to lock real users out, so many systems use increasing delays instead.</p>
+  </section>
+
+  <p class="note">
+    Educational project. Every attack here runs only inside this page, against fake data.
+    Never test these techniques on systems you do not own or have written permission to test.
+  </p>
+
+  <script src="app.js"></script>
+</body>
+</html>
