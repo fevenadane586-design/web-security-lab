@@ -4,6 +4,20 @@ An interactive lab that demonstrates four common web vulnerabilities. Each one h
 
 **Live demo:** https://fevenadane586-design.github.io/web-security-lab/
 
+## Screenshots
+
+### 1. XSS: vulnerable vs secure
+![XSS module](screenshot-xss.png)
+
+### 2. SQL injection
+![SQL injection module](screenshot-sqli.png)
+
+### 3. Password storage
+![Password storage module](screenshot-storage.png)
+
+### 4. Brute force
+![Brute force module](screenshot-brute.png)
+
 ## Modules
 
 | # | Vulnerability | Attack shown | Fix shown | OWASP Top 10 (2021) |
